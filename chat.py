@@ -31,6 +31,9 @@ model.eval()
 bot_name = "BPI"
 
 def get_response(msg):
+    if msg == "cancel":
+        return cancelFlow()
+
     sentence = tokenize(msg)
     X = bag_of_words(sentence, all_words)
     X = X.reshape(1, X.shape[0])
@@ -82,11 +85,17 @@ def processFlow(flow,msg):
 
 
 def endFlow():
-    flow = flowStack.pop()
-    endResponse = flowState[flow]['endMsg'] + json.dumps(flowState[flow]['result'])
-    flowState[flow] = {}
-    return endResponse
+    if flowStack.getSize() > 0:
+        flow = flowStack.pop()
+        endResponse = flowState[flow]['endMsg'] + json.dumps(flowState[flow]['result'])
+        flowState[flow] = {}
+        return endResponse
 
+def cancelFlow():
+    if flowStack.getSize() > 0:
+        flow = flowStack.pop()
+        return "Cancelled " + flow
+    return "Didn't get you..."
 
 if __name__ == "__main__":
     print("Let's chat! (type 'quit' to exit)")
